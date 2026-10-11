@@ -8,7 +8,7 @@ jobs:
     - name: Passo 1 - Baixar Codigo Fonte Limpo
       uses: actions/checkout@v4
       with:
-        submodules: false # Evita o erro 128 ignorando links mortos do Git
+        submodules: false
 
     - name: Passo 2 - Instalar Ambiente .NET Atualizado
       uses: actions/setup-dotnet@v4
@@ -17,10 +17,8 @@ jobs:
 
     - name: Passo 3 - Reconstruir Arquivo de Configuração do Port
       run: |
-        # Remove fisicamente referências antigas a MonoGame que travam o compilador
         rm -rf Submodules
         
-        # Cria um arquivo de projeto .NET limpo do zero focado puramente em Linux ARM64
         echo '<Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
             <OutputType>Exe</OutputType>
@@ -30,13 +28,12 @@ jobs:
           </PropertyGroup>
           <ItemGroup>
             <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
-            <PackageReference Include="NVorbis" Version="2.1.1" />
+            <PackageReference Include="NVorbis" Version="0.10.5" />
           </ItemGroup>
         </Project>' > Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj
 
     - name: Passo 4 - Compilar Binario Nativo para o R36S
       run: |
-        # Compila o port de forma "Self-Contained" (com todas as ferramentas embutidas para rodar direto no ArkOS)
         dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -c Release -r linux-arm64 --self-contained true -o ./output
 
     - name: Passo 5 - Guardar Port Pronto para o R36S
