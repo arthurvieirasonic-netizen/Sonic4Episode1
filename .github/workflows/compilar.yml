@@ -1,0 +1,20 @@
+name: Compilar para R36S
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Configurar .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    - name: Publicar Executável ARM64
+      run: |
+        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -c Release -r linux-arm64 --self-contained true -o ./output
+    - name: Enviar Arquivo Pronto
+      uses: actions/upload-artifact@v3
+      with:
+        name: sonic4-r36s
+        path: ./output/
