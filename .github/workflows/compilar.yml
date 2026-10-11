@@ -1,36 +1,46 @@
-name: Compilar Port Sonic 4 R36S
+name: Compilar Meu Port Sonic 4
 on: [workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Clonar Codigo Bruto
+    - name: Passo 1 - Baixar Codigo Fonte Limpo
       uses: actions/checkout@v4
       with:
-        submodules: false
+        submodules: false # Evita o erro 128 ignorando links mortos do Git
 
-    - name: Instalar SDK do .NET Estável
+    - name: Passo 2 - Instalar Ambiente .NET Atualizado
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    - name: Corrigir Referências de Projetos Quebrados
+    - name: Passo 3 - Reconstruir Arquivo de Configuração do Port
       run: |
-        # Remove fisicamente os links mortos dos submodulos que travavam o Git
-        rm -rf Submodules/MonoGame
+        # Remove fisicamente referências antigas a MonoGame que travam o compilador
+        rm -rf Submodules
         
-        # Cria um arquivo de projeto limpo focado apenas no executável
-        sed -i '/<ProjectReference Include=".*MonoGame.*"/d' Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj
-        
-    - name: Compilar Executável Nativo Linux ARM64
-      run: |
-        # Compila ignorando os pacotes externos ausentes do repositório original
-        dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -c Release -r linux-arm64 --self-contained true -p:DefineConstants="LINUX" -p:DisableImplicitFrameworkReferences=true -o ./output
+        # Cria um arquivo de projeto .NET limpo do zero focado puramente em Linux ARM64
+        echo '<Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <OutputType>Exe</OutputType>
+            <TargetFramework>net8.0</TargetFramework>
+            <ImplicitUsings>enable</ImplicitUsings>
+            <Nullable>enable</Nullable>
+          </PropertyGroup>
+          <ItemGroup>
+            <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+            <PackageReference Include="NVorbis" Version="2.1.1" />
+          </ItemGroup>
+        </Project>' > Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj
 
-    - name: Gerar o Pacote do Seu Port
+    - name: Passo 4 - Compilar Binario Nativo para o R36S
+      run: |
+        # Compila o port de forma "Self-Contained" (com todas as ferramentas embutidas para rodar direto no ArkOS)
+        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -c Release -r linux-arm64 --self-contained true -o ./output
+
+    - name: Passo 5 - Guardar Port Pronto para o R36S
       uses: actions/upload-artifact@v4
       with:
-        name: meu-port-sonic4-r36s
+        name: meu-port-sonic4
         path: ./output/
-
