@@ -12,7 +12,7 @@ jobs:
         dotnet-version: '8.0.x'
     - name: Publicar Executável ARM64
       run: |
-        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -c Release -r linux-arm64 --self-contained true -o ./output
+        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -f net8.0 -c Release -r linux-arm64 --self-contained true -o ./output
     - name: Enviar Arquivo Pronto
       uses: actions/upload-artifact@v4
       with:
