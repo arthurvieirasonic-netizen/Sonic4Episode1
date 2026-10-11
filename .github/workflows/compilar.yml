@@ -10,12 +10,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-    - name: Adicionar Pacote de Áudio Alternativo
+    - name: Publicar Executável Direto ARM64
       run: |
-        dotnet add Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj package NVorbis
-    - name: Publicar Executável ARM64
-      run: |
-        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -f net8.0 -c Release -r linux-arm64 --self-contained true -o ./output
+        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -f net8.0 -c Release -r linux-arm64 --self-contained true -o ./output /p:BuildProjectReferences=false /p:RestorePackages=false
     - name: Enviar Arquivo Pronto
       uses: actions/upload-artifact@v4
       with:
