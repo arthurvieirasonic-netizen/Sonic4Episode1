@@ -6,15 +6,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Configurar .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-    - name: Publicar Executável Direto ARM64
+
+    - name: Limpar pastas fantasmas
       run: |
-        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -f net8.0 -c Release -r linux-arm64 --self-contained true -o ./output /p:BuildProjectReferences=false /p:RestorePackages=false
-    - name: Enviar Arquivo Pronto
+        rm -rf Submodules/MonoGame/ThirdParty/NVorbis
+        rm -rf .git/modules/Submodules/MonoGame/ThirdParty/NVorbis
+
+    - name: Adicionar Som Oficial Centralizado
+      run: |
+        dotnet add Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj package NVorbis --version 2.1.1
+
+    - name: Publicar Executável ARM64 do Seu Port
+      run: |
+        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -f net8.0 -c Release -r linux-arm64 --self-contained true -o ./output
+        
+    - name: Guardar o Port Pronto
       uses: actions/upload-artifact@v4
       with:
-        name: sonic4-r36s
+        name: meu-port-sonic4
         path: ./output/
