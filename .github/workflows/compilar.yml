@@ -1,32 +1,36 @@
-name: Compilar para R36S
+name: Compilar Port Sonic 4 R36S
 on: [workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Clonar Codigo Bruto
+      uses: actions/checkout@v4
+      with:
+        submodules: false
 
-    - name: Configurar .NET
+    - name: Instalar SDK do .NET Estável
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    - name: Limpar pastas fantasmas
+    - name: Corrigir Referências de Projetos Quebrados
       run: |
-        rm -rf Submodules/MonoGame/ThirdParty/NVorbis
-        rm -rf .git/modules/Submodules/MonoGame/ThirdParty/NVorbis
-
-    - name: Adicionar Som Oficial Centralizado
-      run: |
-        dotnet add Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj package NVorbis --version 2.1.1
-
-    - name: Publicar Executável ARM64 do Seu Port
-      run: |
-        dotnet publish Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -f net8.0 -c Release -r linux-arm64 --self-contained true -o ./output
+        # Remove fisicamente os links mortos dos submodulos que travavam o Git
+        rm -rf Submodules/MonoGame
         
-    - name: Guardar o Port Pronto
+        # Cria um arquivo de projeto limpo focado apenas no executável
+        sed -i '/<ProjectReference Include=".*MonoGame.*"/d' Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj
+        
+    - name: Compilar Executável Nativo Linux ARM64
+      run: |
+        # Compila ignorando os pacotes externos ausentes do repositório original
+        dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj -c Release -r linux-arm64 --self-contained true -p:DefineConstants="LINUX" -p:DisableImplicitFrameworkReferences=true -o ./output
+
+    - name: Gerar o Pacote do Seu Port
       uses: actions/upload-artifact@v4
       with:
-        name: meu-port-sonic4
+        name: meu-port-sonic4-r36s
         path: ./output/
+
