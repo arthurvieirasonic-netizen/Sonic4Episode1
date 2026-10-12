@@ -22,24 +22,26 @@ jobs:
         mkdir -p Submodules
         git clone --recursive https://github.com/FNA-XNA/FNA.git Submodules/FNA || true
 
-    - name: Fix CSPROJ to Include Game Source Files
+    - name: Fix CSPROJ and Disable Duplicate Attributes
       run: |
         cd Sonic4Episode1.FNA
         
-        # Cria um csproj inteligente que referencia o FNA e puxa todo o código do Sonic 4 automaticamente
         cat << 'EOF' > Sonic4Episode1.FNA.csproj
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
             <TargetFramework>net8.0</TargetFramework>
             <OutputType>WinExe</OutputType>
             <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+            <!-- Desliga a geração automática para evitar conflito com os arquivos antigos -->
+            <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
             <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+            <!-- Impede que avisos parem a compilação -->
+            <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
           </PropertyGroup>
           <ItemGroup>
             <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
           </ItemGroup>
           <ItemGroup>
-            <!-- Puxa todos os arquivos de código do jogo e do próprio projeto FNA -->
             <Compile Include="..\Sonic4Episode1\**\*.cs" />
             <Compile Include="**\*.cs" />
           </ItemGroup>
