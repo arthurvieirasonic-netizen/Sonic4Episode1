@@ -1,4 +1,4 @@
-name: Build Sonic 4 Ep 1 (WanKerr FNA)
+name: Build Sonic 4 Ep 1 (WanKerr)
 
 on:
   push:
@@ -11,23 +11,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      with:
-        submodules: recursive
-        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore Sonic4Episode1.sln || true
+    - name: Restore Solution
+      run: dotnet restore Sonic4Episode1.sln
 
-    - name: Build FNA Project
-      run: dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj --configuration Release
+    - name: Build Solution
+      run: dotnet build Sonic4Episode1.sln --configuration Release
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Sonic4Episode1-FNA-Build
-        path: Sonic4Episode1.FNA/bin/Release/
+        name: Sonic4Episode1-Build
+        path: |
+          Sonic4Episode1.FNA/bin/Release/
+          Sonic4Episode1/bin/Release/
