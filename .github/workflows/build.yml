@@ -22,6 +22,13 @@ jobs:
         mkdir -p Submodules
         git clone --recursive https://github.com/FNA-XNA/FNA.git Submodules/FNA || true
 
+    - name: Fix Linux Case-Sensitivity Paths
+      run: |
+        cd Sonic4Episode1
+        ln -sf AppMain appmain || true
+        ln -sf AppMain/Gm AppMain/gm || true
+        ln -sf AppMain/GM AppMain/gm || true
+
     - name: Build FNA Project
       run: dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj --configuration Release
 
