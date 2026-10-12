@@ -1,4 +1,4 @@
-name: Build Sonic 4 Ep 1 (WanKerr)
+name: Build Sonic 4 Ep 1 (WanKerr FNA)
 
 on:
   push:
@@ -17,5 +17,11 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Build Project
-      run: dotnet build **/*.csproj --configuration Release
+    - name: Build FNA Project
+      run: dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj --configuration Release
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sonic4Episode1-FNA-Build
+        path: Sonic4Episode1.FNA/bin/Release/
