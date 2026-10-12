@@ -22,10 +22,14 @@ jobs:
         mkdir -p Submodules
         git clone --recursive https://github.com/FNA-XNA/FNA.git Submodules/FNA || true
 
-    - name: Fix Case in Project File
+    - name: Fix Linux Case Sensitivity (Symlink Force)
       run: |
-        cd Sonic4Episode1.FNA
-        sed -i 's/appmain/AppMain/g' Sonic4Episode1.FNA.csproj
+        # Se a pasta 'appmain' existe, criamos um link 'AppMain' para ela (ou vice-versa)
+        if [ -d "Sonic4Episode1/appmain" ]; then
+          ln -sfn appmain Sonic4Episode1/AppMain
+        elif [ -d "Sonic4Episode1/AppMain" ]; then
+          ln -sfn AppMain Sonic4Episode1/appmain
+        fi
 
     - name: Build FNA Project
       run: dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj --configuration Release
