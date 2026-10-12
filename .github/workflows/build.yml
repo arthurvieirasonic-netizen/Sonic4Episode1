@@ -22,16 +22,31 @@ jobs:
         mkdir -p Submodules
         git clone --recursive https://github.com/FNA-XNA/FNA.git Submodules/FNA || true
 
-    - name: Fix Project Paths and Case Sensitivity
+    - name: Rewrite CSPROJ to Auto-Include All Source Files
       run: |
-        # Entra na pasta do projeto FNA e corrige as referências internas do arquivo csproj
+        # Vamos injetar uma regra limpa no csproj para ele aceitar qualquer .cs recursivamente
         cd Sonic4Episode1.FNA
         
-        # Substitui barras invertidas do Windows (\) por barras normais (/)
-        sed -i 's|\\|/|g' Sonic4Episode1.FNA.csproj
+        # Cria um backup do csproj original
+        cp Sonic4Episode1.FNA.csproj Sonic4Episode1.FNA.csproj.bak
         
-        # Garante que qualquer referência a 'appmain' aponte corretamente para o diretório existente
-        sed -i 's|appmain/|appmain/|g' Sonic4Episode1.FNA.csproj
+        # Limpa referências antigas e insere a inclusão automática de arquivos C# de forma global
+        cat << 'EOF' > patch.xml
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net8.0</TargetFramework>
+            <OutputType>WinExe</OutputType>
+            <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+            <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+          </PropertyGroup>
+          <ItemGroup>
+            <ProjectReference Include="..\Submodules\FNA\FNA.Core.csproj" />
+          </ItemGroup>
+        </Project>
+        EOF
+        
+        # Substitui o csproj antigo pelo nosso limpo e automatizado
+        mv patch.xml Sonic4Episode1.FNA.csproj
 
     - name: Build FNA Project
       run: dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj --configuration Release
