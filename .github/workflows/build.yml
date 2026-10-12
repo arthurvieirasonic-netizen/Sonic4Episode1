@@ -1,4 +1,4 @@
-name: Build Sonic 4 Ep 1 (WanKerr)
+name: Build Sonic 4 Ep 1 (WanKerr FNA)
 
 on:
   push:
@@ -22,14 +22,16 @@ jobs:
         mkdir -p Submodules
         git clone --recursive https://github.com/FNA-XNA/FNA.git Submodules/FNA || true
 
-    - name: Fix Linux Case Sensitivity (Symlink Force)
+    - name: Fix Project Paths and Case Sensitivity
       run: |
-        # Se a pasta 'appmain' existe, criamos um link 'AppMain' para ela (ou vice-versa)
-        if [ -d "Sonic4Episode1/appmain" ]; then
-          ln -sfn appmain Sonic4Episode1/AppMain
-        elif [ -d "Sonic4Episode1/AppMain" ]; then
-          ln -sfn AppMain Sonic4Episode1/appmain
-        fi
+        # Entra na pasta do projeto FNA e corrige as referências internas do arquivo csproj
+        cd Sonic4Episode1.FNA
+        
+        # Substitui barras invertidas do Windows (\) por barras normais (/)
+        sed -i 's|\\|/|g' Sonic4Episode1.FNA.csproj
+        
+        # Garante que qualquer referência a 'appmain' aponte corretamente para o diretório existente
+        sed -i 's|appmain/|appmain/|g' Sonic4Episode1.FNA.csproj
 
     - name: Build FNA Project
       run: dotnet build Sonic4Episode1.FNA/Sonic4Episode1.FNA.csproj --configuration Release
